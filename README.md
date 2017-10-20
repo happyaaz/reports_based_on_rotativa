@@ -6,7 +6,8 @@ We have a bunch of stored procedures that collect a lot of data (>30). Most of t
 - table header that itself can be a table;
 - a bunch of rows and columns;
 - there can be plenty of pictures;
-- one report can contain several tables whose data is different.
+- one report can contain several tables whose data is different;
+- if we have rows with numbers, then we need to determine which columns should have a summary and how we display it.
 
 So the question is - how can we avoid having to make views for each report?
 
@@ -16,7 +17,8 @@ In each stored procedure we define what everything is:
 - header;
 - values;
 - column names;
-- everything combined.
+- everything combined;
+- etc.
 
 One view is responsible for displaying everything here.
 
