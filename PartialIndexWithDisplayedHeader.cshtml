@@ -1,0 +1,143 @@
+﻿@model Levo2Reports.Models.Report
+
+@foreach (Levo2Reports.Models.IndividualTable individualTable in Model.listOfTables_list)
+{
+    //  for each individual table inside - print it out
+    @PrintingOutIndividualTables(individualTable)
+}
+
+@helper PrintingOutIndividualTables(Levo2Reports.Models.IndividualTable it)
+{
+if (it.tableName_str != string.Empty)
+{
+    //  if a table is named somehow - print it out
+    <b>@it.tableName_str</b>
+}
+
+if (it.entityId_str != string.Empty)
+{
+    //  if there's any info about how shit near the table should be called - print it out
+    <i>@it.entityId_str - </i>
+}
+if (it.entityName_str != string.Empty)
+{
+        <i>@it.entityName_str</i>
+}
+    <table class="fixed" style="table-layout:fixed;">
+        <tr>
+            @if (it.tableValueHeaders_list != null)
+            {
+                //  if there are any headers for the table to be printed out (when it's just a picture - no need)
+                foreach (string _header in it.tableValueHeaders_list)
+                {
+                    <td class="tableContent" style="width:'@ViewBag.cellWidthInPercentage'; text-align:center;"><b><i>@_header</i></b></td>
+                }
+            }
+        </tr>
+        <tr>
+            @if (it.tableValues_list != null)
+            {
+                //  if there are any rows in a table - do some shit
+                foreach (List<string> row in it.tableValues_list)
+                {
+                <tr>
+                    @foreach (string _rowValue in row)
+                    {
+                        //  if it containt an image - print it out
+                        if (_rowValue.Contains("data:image") || _rowValue.Contains("jpg") || _rowValue.Contains("png"))
+                        {
+                            <td class="tableContent" style="width:'@ViewBag.cellWidthInPercentage';"><img src="@_rowValue" height="400" /></td>
+                        }
+                        else
+                        {
+                            //  if there should be some empty space
+                            if (_rowValue.Contains("---"))
+                            {
+                                <td class="tableContent" style="width:'@ViewBag.cellWidthInPercentage';"></td>
+                            }
+                            else
+                            {
+                                //  else it's normal info
+                                //  check if it's a static field - then no need to align text in center
+                                if (@ViewBag.staticHeaders_list != null)
+                                {
+                                    if (@ViewBag.staticHeaders_list.Contains(it.tableValueHeaders_list[row.IndexOf(_rowValue)]))
+                                    {
+                                        <td class="tableContent" id="staticCell" style="width:'@ViewBag.cellWidthInPercentage';">@_rowValue</td>
+                                    }
+                                    else
+                                    {
+                                        <td class="tableContent" style="width:'@ViewBag.cellWidthInPercentage'; text-align:center;">@_rowValue</td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td class="tableContent" style="width:'@ViewBag.cellWidthInPercentage'; text-align:center;">@_rowValue</td>
+                                }
+                            }
+                        }
+                    }
+                </tr>
+                }
+            }
+            </tr>
+            @if (it.summaryExists_bool == true && it.summaryValues_list != null)
+            {
+                if (it.summaryValues_list.Count > 0)
+                {
+                    //  algorithm for printing out a summary
+                    var firstElement = it.summaryValueHeaders_dict.First();
+                    string firstHeaderOfSummary_str = firstElement.Value[0];
+                    //  we need to find where to position it
+                    int whereWeShouldPositionFirstSummaryElement_int =
+                        it.tableValueHeaders_list.IndexOf(firstHeaderOfSummary_str);
+
+                    //  for positioning summary elements where they belong
+                    <tr>
+                        @for (int i = 0; i < whereWeShouldPositionFirstSummaryElement_int; i++)
+                        {
+                            //  print out some empty spaces before the name of the summary if there's any
+                            if (i != whereWeShouldPositionFirstSummaryElement_int - 1)
+                            {
+                                <td style="width:'@ViewBag.cellWidthInPercentage';"></td>
+                            }
+                            else
+                            {
+                                //  if there's no name for the summary - empty again
+                                if (firstElement.Key != string.Empty)
+                                {
+                                    string key = firstElement.Key;
+                                    if (key.Contains("[0]"))
+                                    {
+                                        key = key.Replace("[0]", "");
+                                    }
+
+                                    <td class="summaryCell" style="width:'@ViewBag.cellWidthInPercentage';"><b><u>@key</u></b></td>
+                                }
+                                else
+                                {
+                                    <td style="width:'@ViewBag.cellWidthInPercentage';"></td>
+                                }
+                                //  displaying the summary values
+                                foreach (string _summaryValue in it.summaryValues_list)
+                                {
+                                    //  if the summary value is empty or null, then no need to display the borders
+                                    if (_summaryValue != string.Empty && _summaryValue != "0")
+                                    {
+                                        <td class="summaryCell" style="width:'@ViewBag.cellWidthInPercentage'; text-align:center;"><b><i>@_summaryValue</i></b></td>
+                                    }
+                                    else
+                                    {
+                                        <td></td>
+                                    }
+                                }
+                            }
+                        }
+
+                    </tr>
+                }
+            }
+
+        </table>
+        <br />
+}
